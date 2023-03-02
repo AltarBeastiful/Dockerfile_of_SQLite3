@@ -4,22 +4,16 @@
 #  We split the RUN layers to cache them separately to fasten the rebuild process
 #  in case of build fails during multi-stage builds.
 # -----------------------------------------------------------------------------
-FROM alpine:latest AS build
+FROM debian:stretch-slim AS build
 
 COPY run-test.sh /run-test.sh
 
 # Install dependencies
 RUN \
-  apk update && \
-  apk upgrade && \
-  apk add \
-  alpine-sdk \
-  build-base  \
-  tcl-dev \
-  tk-dev \
-  mesa-dev \
-  jpeg-dev \
-  libjpeg-turbo-dev
+  apt update && \
+  apt upgrade -y
+
+RUN apt install -y build-essential wget tclsh
 
 # Download latest release
 RUN \
@@ -41,7 +35,7 @@ RUN \
 # -----------------------------------------------------------------------------
 #  Main Stage
 # -----------------------------------------------------------------------------
-FROM alpine:latest
+FROM debian:stretch-slim
 
 COPY --from=build /usr/bin/sqlite3 /usr/bin/sqlite3
 COPY run-test.sh /run-test.sh
@@ -51,10 +45,10 @@ ENV \
   USER_SQLITE=sqlite \
   GROUP_SQLITE=sqlite
 RUN \
-  addgroup -S $GROUP_SQLITE && \
-  adduser  -S $USER_SQLITE -G $GROUP_SQLITE && \
+  addgroup $GROUP_SQLITE && \
+  useradd -l  -g $GROUP_SQLITE  -r $USER_SQLITE && \
   # Fix issue #32 (CVE-2022-3996)
-  apk --no-cache upgrade
+  apt upgrade -y
 
 # Set user
 USER $USER_SQLITE

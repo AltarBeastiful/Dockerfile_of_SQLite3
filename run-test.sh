@@ -109,8 +109,8 @@ TestEquals() {
 printf "%s ... " '- Creating test DB'
 sqlite3 "$path_file_db" <<'HEREDOC'
   create table table_sample(timestamp text, description text);
-  insert into table_sample values(datetime("now"),"First sample data. Hoo");
-  insert into table_sample values(datetime("now"),"Second sample data. Bar");
+  insert into table_sample values(datetime('now'),'First sample data. Hoo');
+  insert into table_sample values(datetime('now'),'Second sample data. Bar');
 HEREDOC
 
 result=$?
